@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>WebSocket Alert Test</title>
+</head>
+
+<body>
+    <h1>Real-Time Threat Alerts</h1>
+    <div id="status">Disconnected</div>
+    <div id="alerts" style="border: 1px solid #ccc; padding: 10px; min-height: 200px;"></div>
+
+    <script>
+        const ws = new WebSocket("ws://localhost:8000/ws/alerts");
+        const statusDiv = document.getElementById("status");
+        const alertsDiv = document.getElementById("alerts");
+
+        ws.onopen = function (event) {
+            statusDiv.innerHTML = "<span style='color:green'>Connected</span>";
+            console.log("Connected to WS");
+        };
+
+        ws.onmessage = function (event) {
+            console.log("Message received:", event.data);
+            const data = JSON.parse(event.data);
+
+            const alertBox = document.createElement("div");
+            alertBox.style.padding = "10px";
+            alertBox.style.margin = "5px";
+            alertBox.style.backgroundColor = data.severity === "HIGH" ? "#ffdddd" : "#eeeeee";
+            alertBox.style.borderLeft = "5px solid red";
+
+            alertBox.innerHTML = `
+                <h3>${data.type} (${data.severity})</h3>
+                <p><strong>Message:</strong> ${data.message}</p>
+                <p><strong>dConfidence:</strong> ${data.confidence}%</p>
+                ${data.image_url ? `<img src="http://localhost:8000${data.image_url}" width="100"/>` : ''}
+            `;
+
+            alertsDiv.prepend(alertBox);
+        };
+
+        ws.onclose = function (event) {
+            statusDiv.innerHTML = "<span style='color:red'>Disconnected</span>";
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+supabase
+python-dotenv
+torch
+transformers
+pillow
+scipy
+tf-keras
