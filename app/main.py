@@ -11,15 +11,10 @@ app = FastAPI(
     version=settings.VERSION
 )
 
-# CORS configuration
+# CORS configuration - Simplest form for cross-origin access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://bluerayscan.netlify.app",
-        "*" 
-    ],
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
