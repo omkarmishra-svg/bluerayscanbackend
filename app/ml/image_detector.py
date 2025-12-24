@@ -4,9 +4,22 @@ import os
 
 class ImageDetector:
     def __init__(self):
-        print("Loading Deepfake Detection Model... This may take a minute first time.")
+        self.pipe = None
+        self.model_loaded = False
+        self.lite_mode = os.getenv("LITE_MODE", "false").lower() == "true"
+        
+        if self.lite_mode:
+            print("LITE_MODE active: Real model loading skipped to save RAM.")
+        else:
+            print("ImageDetector initialized. Model will be loaded on first use.")
+
+    def _load_model(self):
+        if self.model_loaded or self.lite_mode:
+            return
+            
+        print("Loading Deepfake Detection Model... (This will use ~400MB RAM)")
         try:
-            # using a standard deepfake detection model from HF
+            from transformers import pipeline
             self.pipe = pipeline("image-classification", model="dima806/deepfake_vs_real_image_detection")
             self.model_loaded = True
             print("Model loaded successfully.")
@@ -15,12 +28,14 @@ class ImageDetector:
             self.model_loaded = False
 
     def predict(self, image_path: str) -> dict:
+        self._load_model()
+        
         if not self.model_loaded:
-            return {"label": "ERROR", "score": 0.0, "details": "Model not loaded"}
+            print("Inference requested but model not loaded. Falling back to mock.")
+            return self.mock_predict(image_path)
 
         try:
             image = Image.open(image_path)
-            # Pipeline returns unique list like [{'label': 'Real', 'score': 0.5}, ...]
             results = self.pipe(image)
             
             # Get the top result
