@@ -21,7 +21,7 @@ class ImageDetector:
             # 🚀 Move heavy imports here to prevent module-level memory usage
             import torch
             from transformers import pipeline
-            self.pipe = pipeline("image-classification", model="dima806/deepfake_vs_real_image_detection")
+            self.pipe = pipeline("image-classification", model="sarvansh/NotUrFace-AI")
             self.model_loaded = True
             print("Model loaded successfully.")
         except Exception as e:
