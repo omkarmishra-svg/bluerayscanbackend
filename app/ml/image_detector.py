@@ -1,4 +1,3 @@
-from transformers import pipeline
 from PIL import Image
 import os
 
@@ -19,6 +18,8 @@ class ImageDetector:
             
         print("Loading Deepfake Detection Model... (This will use ~400MB RAM)")
         try:
+            # 🚀 Move heavy imports here to prevent module-level memory usage
+            import torch
             from transformers import pipeline
             self.pipe = pipeline("image-classification", model="dima806/deepfake_vs_real_image_detection")
             self.model_loaded = True
@@ -49,7 +50,6 @@ class ImageDetector:
             try:
                 from app.ml.explainability.gradcam import gradcam
                 # For now using mock/simulated heatmap as real model access via pipeline is complex/unstable
-                # In production, we would use hooks on self.pipe.model
                 heatmap_file = gradcam.generate_mock_heatmap(image_path, label)
                 
                 if label == "FAKE":
@@ -67,8 +67,6 @@ class ImageDetector:
                 "explanation": explanation
             }
         except Exception as e:
-            # Fallback for demo stability if model fails during inference
-            # (Though usage of class ensures we usually catch load errors)
             return {"label": "ERROR", "score": 0.0, "details": str(e)}
 
     def mock_predict(self, image_path: str) -> dict:
@@ -81,8 +79,6 @@ class ImageDetector:
         if not os.path.exists(image_path):
              return {"label": "ERROR", "score": 0.0, "details": "File not found"}
         
-        # simple heuristic: if 'real' in filename, return REAL, else FAKE
-        # specific for hackathon demo files
         filename = os.path.basename(image_path).lower()
         if "real" in filename:
              label = "REAL"
